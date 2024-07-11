@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:video_app/my_ios_video_player.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-       
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -33,7 +33,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const recordChannel = MethodChannel("recordPlatform");
-
+  String url = "";
+  bool stopped = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,19 +53,24 @@ class _MyHomePageState extends State<MyHomePage> {
                       debugPrint("Fail: '${e.message}'.");
                     }
                   },
-                  child: const Text("Start")),
+                  child: const Text("Clock in"),),
               TextButton(
                 onPressed: () async {
                   try {
                     final String result =
                         await recordChannel.invokeMethod('stop');
+                    setState(() {
+                      stopped = true;
+                      url = result;
+                    });
                     debugPrint(result);
                   } on PlatformException catch (e) {
                     debugPrint("Fail: '${e.message}'.");
                   }
                 },
-                child: const Text("Stop"),
+                child: const Text("Clock out"),
               ),
+              stopped ? MyIosVideoPlayer(url: url) : const SizedBox()
             ],
           ),
         ));
